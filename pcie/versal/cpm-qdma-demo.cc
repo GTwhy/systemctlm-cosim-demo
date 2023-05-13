@@ -60,7 +60,7 @@ using namespace std;
 #endif
 
 #define KiB (1024)
-#define RAM_SIZE (4 * KiB)
+#define RAM_SIZE (4*8 * KiB)
 
 #define NR_MMIO_BAR  6
 #define NR_IRQ       NR_QDMA_IRQ
@@ -165,7 +165,7 @@ public:
 			this, &pcie_versal::fwd_dma_b_transport);
 
 		// Connect the SBI dummy RAM
-		bus.memmap(0x102100000ULL, 0x1000 - 1,
+		bus.memmap(0x102100000ULL, RAM_SIZE - 1,
 			   ADDRMODE_RELATIVE, -1, sbi_dummy.socket);
 		qdma.card_bus.bind((*bus.t_sk[0]));
 
