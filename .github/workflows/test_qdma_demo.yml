@@ -1,0 +1,30 @@
+name: QDMA-DEMO-TEST
+
+on:
+  push:
+    branches:
+      - 'qdma-demo'
+
+jobs:
+  QDMA-DEMO-TEST:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cloud-image-utils libfdt1
+
+    - name: Build and Run QDMA Demo
+      run: |
+        ./scripts/run_qdma_model_in_host.sh
+
+    - name: Run QEMU
+      run: |
+        ./scripts/run_qemu_in_host.sh
+
+    - name: Debugging with ssh
+      if: ${{ failure() }}
+      uses: lhotari/action-upterm@v1
