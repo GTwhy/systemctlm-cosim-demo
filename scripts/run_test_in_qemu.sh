@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -o errexit
+set -o nounset
+set -o xtrace
+
 # GUEST_MOUNT_POINT=/mnt/shared
 # Update and install required packages
 sudo apt update
@@ -9,7 +13,7 @@ sudo apt install -y make gcc libaio1 libaio-dev kmod
 git clone https://github.com/Xilinx/dma_ip_drivers.git
 # cd ${GUEST_MOUNT_POINT}/dma_ip_drivers/QDMA/linux-kernel
 pushd dma_ip_drivers/QDMA/linux-kernel
-make -j TANDEM_BOOT_SUPPORTED=1
+make TANDEM_BOOT_SUPPORTED=1
 make install
 popd
 

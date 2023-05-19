@@ -8,6 +8,7 @@ UBUNTU_IMG_PATH="${DEMO_PATH}/ubuntu-20.04-server-cloudimg-amd64.img"
 BIOS_PATH="${DEMO_PATH}/xilinx-qemu/pc-bios/bios-256k.bin"
 CLOUD_CONFIG_IMG_PATH="${DEMO_PATH}/cloud_init.img"
 TEMP_FILE_PATH="/tmp/machine-x86-qdma-demo"
+TEST_LOG_FILE_PATH="${TEMP_FILE_PATH}/test.log"
 IMG_SIZE="10G"
 VM_MEM_SIZE="4G"
 VM_SMP_NUM="4"
@@ -29,8 +30,8 @@ wget -q https://cloud-images.ubuntu.com/releases/focal/release-20210125/unpacked
 qemu-img resize $DEMO_PATH/ubuntu-20.04-server-cloudimg-amd64.img $IMG_SIZE
 
 # Download QDMA driver for VM
-git clone https://github.com/Xilinx/dma_ip_drivers.git
-mv dma_ip_drivers $TEMP_FILE_PATH
+# git clone https://github.com/Xilinx/dma_ip_drivers.git
+# mv dma_ip_drivers $TEMP_FILE_PATH
 
 # Download Xilinx QEMU
 # wget -q https://github.com/GTwhy/xilinx-qemu/releases/download/xilinx_v2023.1_build_x86_virtfs/xilinx-qemu.tar.gz
@@ -53,7 +54,7 @@ sudo make install
 # non-kvm version
 $QEMU_TARGET \
     -M q35,kernel-irqchip=split -cpu qemu64,rdtscp \
-    -m $VM_MEM_SIZE -smp $VM_SMP_NUM -display none \
+    -m $VM_MEM_SIZE -smp $VM_SMP_NUM -display none -no-reboot \
     -serial mon:stdio \
     -drive file=$UBUNTU_IMG_PATH \
     -drive file=$CLOUD_CONFIG_IMG_PATH,format=raw \
@@ -71,8 +72,21 @@ $QEMU_TARGET \
     -fsdev local,security_model=mapped,id=fsdev0,path=$TEMP_FILE_PATH \
     -append "root=/dev/sda1 rootwait console=tty1 console=ttyS0 intel_iommu=on"
 
-sudo cat $TEMP_FILE_PATH/test.log
+# Check log file
+if [ ! -f "$TEST_LOG_FILE_PATH" ]
+then
+    echo "${TEST_LOG_FILE_PATH} not found."
+    exit 1
+fi
 
+# 使用grep命令查找指定字符串
+if grep -q -e "FAILED" $TEST_LOG_FILE_PATH
+then
+    echo "Error: FAILED found in $TEST_LOG_FILE_PATH"
+    exit 1
+else
+    echo "Success: No FAILED or error found in $TEST_LOG_FILE_PATH"
+fi
 # # kvm version
 # $QEMU_TARGET \
 #     -M q35,accel=kvm,kernel-irqchip=split -cpu qemu64,rdtscp \
