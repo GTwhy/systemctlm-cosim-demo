@@ -72,6 +72,8 @@ $QEMU_TARGET \
     -fsdev local,security_model=mapped,id=fsdev0,path=$TEMP_FILE_PATH \
     -append "root=/dev/sda1 rootwait console=tty1 console=ttyS0 intel_iommu=on"
 
+sudo cat $TEMP_FILE_PATH/test.log
+
 # Check log file
 if [ ! -f "$TEST_LOG_FILE_PATH" ]
 then
