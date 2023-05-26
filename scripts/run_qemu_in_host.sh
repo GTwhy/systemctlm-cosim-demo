@@ -36,7 +36,7 @@ qemu-img resize $DEMO_PATH/ubuntu-20.04-server-cloudimg-amd64.img $IMG_SIZE
 wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
 tar xf linux-5.4.tar.xz
 pushd linux-5.4
-make deconfig
+make defconfig
 make prepare
 popd
 

@@ -3,9 +3,6 @@ set -o nounset
 set -o xtrace
 
 GUEST_MOUNT_POINT=/mnt/shared
-# Update and install required packages
-sudo apt update
-sudo apt install -y make gcc libaio1 libaio-dev kmod
 
 # Download and compile Xilinx opensource QDMA driver and userspace applications
 pushd ${GUEST_MOUNT_POINT}/dma_ip_drivers/QDMA/linux-kernel
