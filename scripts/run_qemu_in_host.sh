@@ -103,7 +103,6 @@ then
     exit 1
 fi
 
-# 使用grep命令查找指定字符串
 if grep -q -e "FAILED" $TEST_LOG_FILE_PATH
 then
     echo "Error: FAILED found in $TEST_LOG_FILE_PATH"
