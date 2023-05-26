@@ -28,10 +28,9 @@ cloud-localds $CLOUD_CONFIG_IMG_PATH scripts/cloud_init.cfg
 cd $DEMO_PATH
 # Download OS images
 wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/ubuntu-22.04-server-cloudimg-amd64.img
-wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/unpacked/ubuntu-22.04-server-cloudimg-amd64-vmlinuz-generic
-wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/unpacked/ubuntu-22.04-server-cloudimg-amd64-initrd-generic
+wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/unpacked/jammy-server-cloudimg-amd64-vmlinuz-generic
+wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/unpacked/jammy-server-cloudimg-amd64-initrd-generic
 qemu-img resize $DEMO_PATH/ubuntu-22.04-server-cloudimg-amd64.img $IMG_SIZE
-
 # Download and make QDMA driver for VM
 # sudo bash -c 'echo "deb http://mirrors.kernel.org/ubuntu focal-updates main" >> /etc/apt/sources.list'
 sudo apt-get update
