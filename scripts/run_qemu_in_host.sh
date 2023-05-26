@@ -33,20 +33,20 @@ wget -q https://cloud-images.ubuntu.com/releases/focal/release-20210125/unpacked
 qemu-img resize $DEMO_PATH/ubuntu-20.04-server-cloudimg-amd64.img $IMG_SIZE
 
 # Download and make QDMA driver for VM
+sudo bash -c 'echo "deb http://mirrors.kernel.org/ubuntu focal-updates main" >> /etc/apt/sources.list'
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
-libcap-ng-dev libattr1-dev libelf-dev libaio-dev
+libcap-ng-dev libattr1-dev libelf-dev libaio-dev linux-headers-5.4.0-64-generic
 
-wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
-tar xf linux-5.4.tar.xz
-pushd linux-5.4
-make defconfig
-make prepare
-popd
+# wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
+# tar xf linux-5.4.tar.xz
+# make defconfig
+# make prepare
+# popd
 
 git clone https://github.com/Xilinx/dma_ip_drivers.git
 pushd dma_ip_drivers/QDMA/linux-kernel
-make TANDEM_BOOT_SUPPORTED=1 KDIR=$DEMO_PATH/linux-5.4
+make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/linux-headers-5.4.0-64-generic
 popd
 mv dma_ip_drivers $TEMP_FILE_PATH
 
