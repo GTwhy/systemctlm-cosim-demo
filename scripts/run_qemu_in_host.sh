@@ -1,5 +1,8 @@
 #!/bin/bash
-# Change the paths below to match your environment
+set -o errexit
+set -o nounset
+set -o xtrace
+
 DEMO_PATH="/home/${USER}/cosim_demo"
 QEMU_TARGET="qemu-system-x86_64"
 UBUNTU_KERNEL_PATH="${DEMO_PATH}/ubuntu-20.04-server-cloudimg-amd64-vmlinuz-generic"
@@ -29,9 +32,19 @@ wget -q https://cloud-images.ubuntu.com/releases/focal/release-20210125/unpacked
 wget -q https://cloud-images.ubuntu.com/releases/focal/release-20210125/unpacked/ubuntu-20.04-server-cloudimg-amd64-initrd-generic
 qemu-img resize $DEMO_PATH/ubuntu-20.04-server-cloudimg-amd64.img $IMG_SIZE
 
-# Download QDMA driver for VM
-# git clone https://github.com/Xilinx/dma_ip_drivers.git
-# mv dma_ip_drivers $TEMP_FILE_PATH
+# Download and make QDMA driver for VM
+wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
+tar xf linux-5.4.tar.xz
+pushd linux-5.4
+make deconfig
+make prepare
+popd
+
+git clone https://github.com/Xilinx/dma_ip_drivers.git
+pushd dma_ip_drivers/QDMA/linux-kernel
+make TANDEM_BOOT_SUPPORTED=1 KDIR=$DEMO_PATH/linux-5.4
+popd
+mv dma_ip_drivers $TEMP_FILE_PATH
 
 # Download Xilinx QEMU
 # wget -q https://github.com/GTwhy/xilinx-qemu/releases/download/xilinx_v2023.1_build_x86_virtfs/xilinx-qemu.tar.gz

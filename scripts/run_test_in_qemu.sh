@@ -1,25 +1,19 @@
 #!/bin/bash
-
-set -o errexit
 set -o nounset
 set -o xtrace
 
-# GUEST_MOUNT_POINT=/mnt/shared
+GUEST_MOUNT_POINT=/mnt/shared
 # Update and install required packages
 sudo apt update
 sudo apt install -y make gcc libaio1 libaio-dev kmod
 
 # Download and compile Xilinx opensource QDMA driver and userspace applications
-git clone https://github.com/Xilinx/dma_ip_drivers.git
-# cd ${GUEST_MOUNT_POINT}/dma_ip_drivers/QDMA/linux-kernel
-pushd dma_ip_drivers/QDMA/linux-kernel
-make TANDEM_BOOT_SUPPORTED=1
+pushd ${GUEST_MOUNT_POINT}/dma_ip_drivers/QDMA/linux-kernel
 make install
 popd
 
 # Driver location
-# DRIVER_LOC="${GUEST_MOUNT_POINT}/dma_ip_drivers"
-DRIVER_LOC=`realpath ./dma_ip_drivers`
+DRIVER_LOC="${GUEST_MOUNT_POINT}/dma_ip_drivers"
 TEMP=/tmp
 FILE1=$TEMP/test.txt
 FILE2=$TEMP/test2.txt
@@ -248,3 +242,5 @@ rmmod qdma-pf.ko
 
 echo "TEST4: Cleaning Up"
 rm $FILE2 $FILE5 $FILE6 -f
+
+sudo poweroff

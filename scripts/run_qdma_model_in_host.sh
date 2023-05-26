@@ -1,3 +1,8 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o xtrace
+
 TEMP_FILE_PATH="/tmp/machine-x86-qdma-demo"
 DEMO_PATH="/home/${USER}/cosim_demo"
 SYSTEMC_VERSION=systemc-2.3.3
