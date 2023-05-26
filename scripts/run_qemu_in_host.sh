@@ -3,11 +3,17 @@ set -o errexit
 set -o nounset
 set -o xtrace
 
+IMG_RELEASE_URL="https://cloud-images.ubuntu.com/releases/jammy/release-20230518"
+IMG_RELEASE_UNPACKED_URL="${IMG_RELEASE_URL}/unpacked"
+IMG_NAME="ubuntu-22.04-server-cloudimg-amd64.img"
+KERNEL_NAME="jammy-server-cloudimg-amd64-vmlinuz-generic"
+INITRD_NAME="jammy-server-cloudimg-amd64-initrd-generic"
+KERNEL_VERSION="linux-headers-5.15.0-72-generic"
 DEMO_PATH="/home/${USER}/cosim_demo"
 QEMU_TARGET="qemu-system-x86_64"
-UBUNTU_KERNEL_PATH="${DEMO_PATH}/ubuntu-22.04-server-cloudimg-amd64-vmlinuz-generic"
-UBUNTU_INITRD_PATH="${DEMO_PATH}/jammy-server-cloudimg-amd64-initrd-generic"
-UBUNTU_IMG_PATH="${DEMO_PATH}/jammy-server-cloudimg-amd64.img"
+UBUNTU_IMG_PATH="${DEMO_PATH}/${IMG_NAME}"
+UBUNTU_KERNEL_PATH="${DEMO_PATH}/${KERNEL_NAME}"
+UBUNTU_INITRD_PATH="${DEMO_PATH}/${INITRD_NAME}"
 BIOS_PATH="${DEMO_PATH}/xilinx-qemu/pc-bios/bios-256k.bin"
 CLOUD_CONFIG_IMG_PATH="${DEMO_PATH}/cloud_init.img"
 TEMP_FILE_PATH="/tmp/machine-x86-qdma-demo"
@@ -26,16 +32,18 @@ cp scripts/run_test_in_qemu.sh $TEMP_FILE_PATH
 mkdir -p $DEMO_PATH
 cloud-localds $CLOUD_CONFIG_IMG_PATH scripts/cloud_init.cfg
 cd $DEMO_PATH
+
 # Download OS images
-wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/ubuntu-22.04-server-cloudimg-amd64.img
-wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/unpacked/jammy-server-cloudimg-amd64-vmlinuz-generic
-wget -q https://cloud-images.ubuntu.com/releases/jammy/release-20230518/unpacked/jammy-server-cloudimg-amd64-initrd-generic
-qemu-img resize $DEMO_PATH/ubuntu-22.04-server-cloudimg-amd64.img $IMG_SIZE
+wget -q $IMG_RELEASE_URL/$IMG_NAME
+wget -q $IMG_RELEASE_UNPACKED_URL/$KERNEL_NAME
+wget -q $IMG_RELEASE_UNPACKED_URL/$INITRD_NAME
+qemu-img resize $DEMO_PATH/$IMG_NAME $IMG_SIZE
+
 # Download and make QDMA driver for VM
 # sudo bash -c 'echo "deb http://mirrors.kernel.org/ubuntu focal-updates main" >> /etc/apt/sources.list'
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
-libcap-ng-dev libattr1-dev libelf-dev libaio-dev linux-headers-5.15.0-72-generic
+libcap-ng-dev libattr1-dev libelf-dev libaio-dev $KERNEL_VERSION
 
 # wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
 # tar xf linux-5.4.tar.xz
@@ -45,7 +53,7 @@ libcap-ng-dev libattr1-dev libelf-dev libaio-dev linux-headers-5.15.0-72-generic
 
 git clone https://github.com/Xilinx/dma_ip_drivers.git
 pushd dma_ip_drivers/QDMA/linux-kernel
-make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/linux-headers-5.15.0-72-generic LDFLAGS=-static
+make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/$KERNEL_VERSION
 popd
 mv dma_ip_drivers $TEMP_FILE_PATH
 
