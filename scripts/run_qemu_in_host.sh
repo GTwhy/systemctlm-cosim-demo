@@ -33,6 +33,10 @@ wget -q https://cloud-images.ubuntu.com/releases/focal/release-20210125/unpacked
 qemu-img resize $DEMO_PATH/ubuntu-20.04-server-cloudimg-amd64.img $IMG_SIZE
 
 # Download and make QDMA driver for VM
+sudo apt-get update
+sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
+libcap-ng-dev libattr1-dev libelf-dev libaio-dev
+
 wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
 tar xf linux-5.4.tar.xz
 pushd linux-5.4
@@ -57,9 +61,7 @@ git clone https://github.com/GTwhy/xilinx-qemu.git
 cd xilinx-qemu
 mkdir qemu_build
 cd qemu_build
-sudo apt-get update
-sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
-libcap-ng-dev libattr1-dev
+
 ../configure  --target-list=x86_64-softmmu --enable-virtfs
 make -j
 sudo make install
