@@ -26,7 +26,7 @@ jobs:
         cache-name: xilinx-qemu
       with:
         path: ${{ env.DEMO_PATH }}/xilinx-qemu
-        key: xilinx-qemu-${{ hashFiles(env.DEMO_PATH + '/xilinx-qemu/**') }}
+        key: xilinx-qemu-${{ hashFiles('**/xilinx-qemu/**') }}
 
     - if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' }}
       name: Build Xilinx QEMU
