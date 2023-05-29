@@ -48,6 +48,10 @@ docker build -t dma-driver-builder .
 docker run --rm -v $TEMP_FILE_PATH:$DOCKER_DRIVER_PATH dma-driver-builder
 
 # Build Xilinx QEMU
+sudo apt update
+sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
+libcap-ng-dev libattr1-dev
+
 git clone https://github.com/GTwhy/xilinx-qemu.git
 cd xilinx-qemu
 mkdir qemu_build
