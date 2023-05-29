@@ -9,15 +9,15 @@ jobs:
   QDMA-DEMO-TEST:
     runs-on: ubuntu-latest
     env:
-      DEMO_PATH: "/home/${USER}/cosim_demo"
+      DEMO_PATH: /home/runner/cosim_demo
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y cloud-image-utils libfdt1
+        sudo apt update
+        sudo apt install -y cloud-image-utils libfdt1
 
     - name: Use Cache of Xilinx QEMU
       id: cache-qemu
@@ -26,7 +26,7 @@ jobs:
         cache-name: xilinx-qemu
       with:
         path: ${{ env.DEMO_PATH }}/xilinx-qemu
-        key: xilinx-qemu-${{ hashFiles('**/xilinx-qemu/**') }}
+        key: xilinx-qemu-${{ hashFiles('${{ env.DEMO_PATH }}/xilinx-qemu/**') }}
 
     - if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' }}
       name: Build Xilinx QEMU
