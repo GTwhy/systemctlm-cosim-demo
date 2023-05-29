@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive KERNEL_VERSION=linux-headers-5.4.0-64-generic
 
 # Update the source list and install required packages
 RUN apt update && \
-    apt install -y sudo apt install -y make gcc libaio1 libaio-dev kmod $KERNEL_VERSION
+    apt install -y make gcc libaio1 libaio-dev kmod $KERNEL_VERSION
 
 # Clone the QDMA driver
 RUN git clone https://github.com/Xilinx/dma_ip_drivers.git
