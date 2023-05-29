@@ -5,7 +5,7 @@ set -o xtrace
 GUEST_MOUNT_POINT=/mnt/shared
 
 sudo apt update
-sudo apt install -y make gcc libaio1 libaio-dev kmod
+sudo apt install -y make
 # Download and compile Xilinx opensource QDMA driver and userspace applications
 pushd ${GUEST_MOUNT_POINT}/dma_ip_drivers/QDMA/linux-kernel
 make install

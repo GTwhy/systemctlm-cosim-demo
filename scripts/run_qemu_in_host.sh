@@ -3,12 +3,12 @@ set -o errexit
 set -o nounset
 set -o xtrace
 
-IMG_RELEASE_URL="https://cloud-images.ubuntu.com/releases/jammy/release-20230518"
+IMG_RELEASE_URL="https://cloud-images.ubuntu.com/releases/focal/release-20210125"
 IMG_RELEASE_UNPACKED_URL="${IMG_RELEASE_URL}/unpacked"
-IMG_NAME="ubuntu-22.04-server-cloudimg-amd64.img"
-KERNEL_NAME="jammy-server-cloudimg-amd64-vmlinuz-generic"
-INITRD_NAME="jammy-server-cloudimg-amd64-initrd-generic"
-KERNEL_VERSION="linux-headers-5.15.0-72-generic"
+IMG_NAME="ubuntu-20.04-server-cloudimg-amd64.imgs"
+KERNEL_NAME="ubuntu-20.04-server-cloudimg-amd64-vmlinuz-generic"
+INITRD_NAME="ubuntu-20.04-server-cloudimg-amd64-initrd-generic"
+KERNEL_VERSION="linux-headers-5.4.0-64-generic"
 DEMO_PATH="/home/${USER}/cosim_demo"
 QEMU_TARGET="qemu-system-x86_64"
 UBUNTU_IMG_PATH="${DEMO_PATH}/${IMG_NAME}"
@@ -40,28 +40,16 @@ wget -q $IMG_RELEASE_UNPACKED_URL/$INITRD_NAME
 qemu-img resize $DEMO_PATH/$IMG_NAME $IMG_SIZE
 
 # Download and make QDMA driver for VM
-# sudo bash -c 'echo "deb http://mirrors.kernel.org/ubuntu focal-updates main" >> /etc/apt/sources.list'
+sudo bash -c 'echo "deb http://mirrors.kernel.org/ubuntu focal-updates main" >> /etc/apt/sources.list'
 sudo apt-get update
 sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
 libcap-ng-dev libattr1-dev libelf-dev libaio-dev $KERNEL_VERSION
-
-# wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.4.tar.xz
-# tar xf linux-5.4.tar.xz
-# make defconfig
-# make prepare
-# popd
 
 git clone https://github.com/Xilinx/dma_ip_drivers.git
 pushd dma_ip_drivers/QDMA/linux-kernel
 make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/$KERNEL_VERSION
 popd
 mv dma_ip_drivers $TEMP_FILE_PATH
-
-# Download Xilinx QEMU
-# wget -q https://github.com/GTwhy/xilinx-qemu/releases/download/xilinx_v2023.1_build_x86_virtfs/xilinx-qemu.tar.gz
-# tar xzf xilinx-qemu.tar.gz
-# cd xilinx-qemu/build
-# sudo make install
 
 # Build Xilinx QEMU
 git clone https://github.com/GTwhy/xilinx-qemu.git
@@ -110,6 +98,7 @@ then
 else
     echo "Success: No FAILED or error found in $TEST_LOG_FILE_PATH"
 fi
+
 # # kvm version
 # $QEMU_TARGET \
 #     -M q35,accel=kvm,kernel-irqchip=split -cpu qemu64,rdtscp \
