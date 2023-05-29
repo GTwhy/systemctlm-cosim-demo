@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEMO_PATH: "/home/${{ github.actor }}/cosim_demo"
-      DEMO_PATH: "${{ env.DEMO_PATH }}/xilinx-qemu"
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
