@@ -28,10 +28,13 @@ RP_PCIE_SLOT_NUM="0"
 RP_CHAN_NUM="0"
 PCIE_ROOT_SLOT_NUM="1"
 
+# Copy scripts
 cp scripts/run_test_in_qemu.sh $TEMP_FILE_PATH
-
-mkdir -p $DEMO_PATH
 cloud-localds $CLOUD_CONFIG_IMG_PATH scripts/cloud_init.cfg
+
+# Create demo path
+mkdir -p $DEMO_PATH
+cp scripts/Dockerfile $DEMO_PATH
 cd $DEMO_PATH
 
 # Download OS images
@@ -41,17 +44,14 @@ wget -q $IMG_RELEASE_UNPACKED_URL/$INITRD_NAME
 qemu-img resize $DEMO_PATH/$IMG_NAME $IMG_SIZE
 
 # Download and make QDMA driver for VM
-pushd scripts
 docker build -t dma-driver-builder .
 docker run --rm -v $TEMP_FILE_PATH:$DOCKER_DRIVER_PATH dma-driver-builder
-popd
 
 # Build Xilinx QEMU
 git clone https://github.com/GTwhy/xilinx-qemu.git
 cd xilinx-qemu
 mkdir qemu_build
 cd qemu_build
-
 ../configure  --target-list=x86_64-softmmu --enable-virtfs
 make -j
 sudo make install
