@@ -9,7 +9,7 @@ jobs:
   QDMA-DEMO-TEST:
     runs-on: ubuntu-latest
     env:
-      DEMO_PATH: "/home/${{ github.actor }}/cosim_demo"
+      DEMO_PATH: "/home/${USER}/cosim_demo"
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
