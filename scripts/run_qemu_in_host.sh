@@ -48,18 +48,24 @@ qemu-img resize $DEMO_PATH/$IMG_NAME $IMG_SIZE
 docker build -t dma-driver-builder .
 docker run --rm -v $TEMP_FILE_PATH:$DOCKER_DRIVER_PATH dma-driver-builder
 
-# # Build Xilinx QEMU
-# sudo apt update
-# sudo apt install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
-# libcap-ng-dev libattr1-dev
+# Build or export Xilinx QEMU
+if [ $XILINX_QEMU_BUILD_CACHE = 'true' ]; then
+    echo "Using cached Xilinx QEMU build"
+    export PATH=$PATH:$DEMO_PATH/xilinx-qemu/qemu_build
+else
+    echo "Building Xilinx QEMU"
+    sudo apt update
+    sudo apt install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
+    libcap-ng-dev libattr1-dev
 
-# git clone https://github.com/GTwhy/xilinx-qemu.git
-# cd xilinx-qemu
-# mkdir qemu_build
-# cd qemu_build
-# ../configure  --target-list=x86_64-softmmu --enable-virtfs
-# make -j
-# sudo make install
+    git clone https://github.com/GTwhy/xilinx-qemu.git
+    cd xilinx-qemu
+    mkdir qemu_build
+    cd qemu_build
+    ../configure  --target-list=x86_64-softmmu --enable-virtfs
+    make -j
+    sudo make install
+fi
 
 # non-kvm version
 $QEMU_TARGET \
@@ -104,13 +110,13 @@ fi
 #     -M q35,accel=kvm,kernel-irqchip=split -cpu qemu64,rdtscp \
 #     -m 4G -smp 4 -enable-kvm -display none \
 #     -serial mon:stdio \
-#     -device intel-iommu,intremap=on,device-iotlb=on \
+#     -machine-path ${TEMP_FILE_PATH} \
 #     -drive file=$UBUNTU_IMG_PATH \
 #     -drive file=$CLOUD_CONFIG_IMG_PATH,format=raw \
+#     -device intel-iommu,intremap=on,device-iotlb=on \
 #     -device ioh3420,id=rootport1,slot=1 \
 #     -device remote-port-pci-adaptor,bus=rootport1,id=rp0 \
-#     -machine-path ${TEMP_FILE_PATH} \
-#     -device virtio-net-pci,netdev=net0 -netdev type=user,id=net0,hostfwd=tcp::2222-:22\
+#     -device virtio-net-pci,netdev=net0 -netdev type=user,id=net0,hostfwd=tcp::2222-:22 \
 #     -device remote-port-pcie-root-port,id=rprootport,slot=0,rp-adaptor0=rp,rp-chan0=0 \
-#     -fsdev local,security_model=mapped,id=fsdev0,path=$TEMP_FILE_PATH \
-#     -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=shared
+#     -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=shared \
+#     -fsdev local,security_model=mapped,id=fsdev0,path=$TEMP_FILE_PATH
