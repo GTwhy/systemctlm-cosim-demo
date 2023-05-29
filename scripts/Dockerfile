@@ -14,7 +14,8 @@ RUN git clone https://github.com/Xilinx/dma_ip_drivers.git
 
 # Build the driver
 WORKDIR dma_ip_drivers/QDMA/linux-kernel
-RUN make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/$KERNEL_VERSION
+RUN make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/$KERNEL_VERSION && \
+    mkdir -p $TEMP_FILE_PATH
 
 # Move the built driver to the temp path
-RUN mv /dma_ip_drivers $TEMP_FILE_PATH
+CMD mv /dma_ip_drivers $TEMP_FILE_PATH

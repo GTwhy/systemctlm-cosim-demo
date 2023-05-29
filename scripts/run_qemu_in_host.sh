@@ -17,6 +17,7 @@ UBUNTU_INITRD_PATH="${DEMO_PATH}/${INITRD_NAME}"
 BIOS_PATH="${DEMO_PATH}/xilinx-qemu/pc-bios/bios-256k.bin"
 CLOUD_CONFIG_IMG_PATH="${DEMO_PATH}/cloud_init.img"
 TEMP_FILE_PATH="/tmp/machine-x86-qdma-demo"
+DOCKER_DRIVER_PATH="/tmp/driver"
 TEST_LOG_FILE_PATH="${TEMP_FILE_PATH}/test.log"
 IMG_SIZE="10G"
 VM_MEM_SIZE="4G"
@@ -40,16 +41,10 @@ wget -q $IMG_RELEASE_UNPACKED_URL/$INITRD_NAME
 qemu-img resize $DEMO_PATH/$IMG_NAME $IMG_SIZE
 
 # Download and make QDMA driver for VM
-sudo bash -c 'echo "deb http://mirrors.kernel.org/ubuntu focal-updates main" >> /etc/apt/sources.list'
-sudo apt-get update
-sudo apt-get install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
-libcap-ng-dev libattr1-dev libelf-dev libaio-dev $KERNEL_VERSION
-
-git clone https://github.com/Xilinx/dma_ip_drivers.git
-pushd dma_ip_drivers/QDMA/linux-kernel
-make TANDEM_BOOT_SUPPORTED=1 KDIR=/usr/src/$KERNEL_VERSION
+pushd scripts
+docker build -t dma-driver-builder .
+docker run --rm -v $TEMP_FILE_PATH:$DOCKER_DRIVER_PATH dma-driver-builder
 popd
-mv dma_ip_drivers $TEMP_FILE_PATH
 
 # Build Xilinx QEMU
 git clone https://github.com/GTwhy/xilinx-qemu.git
