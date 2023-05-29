@@ -27,6 +27,7 @@ VM_SSH_PORT_IN_HOST="2222"
 RP_PCIE_SLOT_NUM="0"
 RP_CHAN_NUM="0"
 PCIE_ROOT_SLOT_NUM="1"
+EXIT_ERR_CODE="1"
 
 # Copy scripts
 cp scripts/run_test_in_qemu.sh $TEMP_FILE_PATH
@@ -87,13 +88,13 @@ sudo cat $TEMP_FILE_PATH/test.log
 if [ ! -f "$TEST_LOG_FILE_PATH" ]
 then
     echo "${TEST_LOG_FILE_PATH} not found."
-    exit 1
+    exit $EXIT_ERR_CODE
 fi
 
 if grep -q -e "FAILED" $TEST_LOG_FILE_PATH
 then
     echo "Error: FAILED found in $TEST_LOG_FILE_PATH"
-    exit 1
+    exit $EXIT_ERR_CODE
 else
     echo "Success: No FAILED or error found in $TEST_LOG_FILE_PATH"
 fi
