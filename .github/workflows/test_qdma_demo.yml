@@ -27,10 +27,7 @@ jobs:
       with:
         path: |
           ${{ env.DEMO_PATH }}/xilinx-qemu
-          ~/bin
-          ~/lib
         key: xilinx-qemu-${{ hashFiles('${{ env.DEMO_PATH }}/xilinx-qemu/**') }}
-
 
     - if: ${{ steps.cache-qemu.outputs.cache-hit != 'true' }}
       name: Build Xilinx QEMU
@@ -49,16 +46,6 @@ jobs:
           ../configure  --target-list=x86_64-softmmu --enable-virtfs
           make -j
           sudo make install
-
-    - name: Save Cache of Xilinx QEMU
-      id: cache-qemu-save
-      uses: actions/cache/save@v3
-      with:
-        path: |
-          ${{ env.DEMO_PATH }}/xilinx-qemu
-          ~/bin
-          ~/lib
-        key: xilinx-qemu-${{ hashFiles('${{ env.DEMO_PATH }}/xilinx-qemu/**') }}
 
     - name: Build and Run QDMA Demo
       run: |
