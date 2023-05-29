@@ -5,7 +5,7 @@ set -o xtrace
 
 IMG_RELEASE_URL="https://cloud-images.ubuntu.com/releases/focal/release-20210125"
 IMG_RELEASE_UNPACKED_URL="${IMG_RELEASE_URL}/unpacked"
-IMG_NAME="ubuntu-20.04-server-cloudimg-amd64.imgs"
+IMG_NAME="ubuntu-20.04-server-cloudimg-amd64.img"
 KERNEL_NAME="ubuntu-20.04-server-cloudimg-amd64-vmlinuz-generic"
 INITRD_NAME="ubuntu-20.04-server-cloudimg-amd64-initrd-generic"
 KERNEL_VERSION="linux-headers-5.4.0-64-generic"
