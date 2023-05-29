@@ -48,18 +48,18 @@ qemu-img resize $DEMO_PATH/$IMG_NAME $IMG_SIZE
 docker build -t dma-driver-builder .
 docker run --rm -v $TEMP_FILE_PATH:$DOCKER_DRIVER_PATH dma-driver-builder
 
-# Build Xilinx QEMU
-sudo apt update
-sudo apt install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
-libcap-ng-dev libattr1-dev
+# # Build Xilinx QEMU
+# sudo apt update
+# sudo apt install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
+# libcap-ng-dev libattr1-dev
 
-git clone https://github.com/GTwhy/xilinx-qemu.git
-cd xilinx-qemu
-mkdir qemu_build
-cd qemu_build
-../configure  --target-list=x86_64-softmmu --enable-virtfs
-make -j
-sudo make install
+# git clone https://github.com/GTwhy/xilinx-qemu.git
+# cd xilinx-qemu
+# mkdir qemu_build
+# cd qemu_build
+# ../configure  --target-list=x86_64-softmmu --enable-virtfs
+# make -j
+# sudo make install
 
 # non-kvm version
 $QEMU_TARGET \

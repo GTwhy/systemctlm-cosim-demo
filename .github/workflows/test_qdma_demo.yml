@@ -8,6 +8,9 @@ on:
 jobs:
   QDMA-DEMO-TEST:
     runs-on: ubuntu-latest
+    env:
+      DEMO_PATH: "/home/${{ github.actor }}/cosim_demo"
+      DEMO_PATH: "${{ env.DEMO_PATH }}/xilinx-qemu"
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -16,6 +19,31 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y cloud-image-utils libfdt1
+
+    - name: Cache QEMU Build
+      uses: actions/cache@v2
+      id: qemu-cache
+      with:
+        path: ${{ env.DEMO_PATH }}/xilinx-qemu ${{ env.DEMO_PATH }}/bin ${{ env.DEMO_PATH }}/lib
+        key: xilinx-qemu-${{ hashFiles('**/xilinx-qemu/**') }}
+
+    - name: Build Xilinx QEMU
+      if: steps.qemu-cache.outputs.cache-hit != 'true'
+      run: |
+          # Build Xilinx QEMU
+          sudo apt update
+          sudo apt install -y build-essential pkg-config zlib1g-dev libglib2.0-dev libpixman-1-dev libfdt-dev ninja-build \
+          libcap-ng-dev libattr1-dev
+
+          mkdir -p ${{ env.DEMO_PATH }}
+          cd ${{ env.DEMO_PATH }}
+          git clone https://github.com/GTwhy/xilinx-qemu.git
+          cd xilinx-qemu
+          mkdir qemu_build
+          cd qemu_build
+          ../configure  --target-list=x86_64-softmmu --enable-virtfs
+          make -j
+          sudo make install
 
     - name: Build and Run QDMA Demo
       run: |
