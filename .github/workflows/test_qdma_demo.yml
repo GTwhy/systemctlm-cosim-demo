@@ -19,13 +19,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y cloud-image-utils libfdt1
 
-    - name: Cache QEMU Build
-      uses: actions/cache@v2
-      id: qemu-cache
-      with:
-        path: ${{ env.DEMO_PATH }}/xilinx-qemu ${{ env.DEMO_PATH }}/bin ${{ env.DEMO_PATH }}/lib
-        key: xilinx-qemu-${{ hashFiles('**/xilinx-qemu/**') }}
-
     - name: Build Xilinx QEMU
       if: steps.qemu-cache.outputs.cache-hit != 'true'
       run: |
@@ -43,6 +36,13 @@ jobs:
           ../configure  --target-list=x86_64-softmmu --enable-virtfs
           make -j
           sudo make install
+
+    - name: Cache QEMU Build
+      uses: actions/cache@v2
+      id: qemu-cache
+      with:
+        path: ${{ env.DEMO_PATH }}/xilinx-qemu ${{ env.DEMO_PATH }}/bin ${{ env.DEMO_PATH }}/lib
+        key: xilinx-qemu-${{ hashFiles('**/xilinx-qemu/**') }}
 
     - name: Build and Run QDMA Demo
       run: |
