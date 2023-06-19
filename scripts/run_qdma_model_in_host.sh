@@ -8,6 +8,7 @@ DEMO_PATH="/home/${USER}/cosim_demo"
 SYSTEMC_VERSION=systemc-2.3.3
 SYSTEMC_PATH="${DEMO_PATH}/${SYSTEMC_VERSION}"
 
+# Install the systemc-2.3.3 as dependency
 mkdir -p $DEMO_PATH
 pushd $DEMO_PATH
 wget -q https://www.accellera.org/images/downloads/standards/systemc/systemc-2.3.3.tar.gz &&                                                                                                                                                     

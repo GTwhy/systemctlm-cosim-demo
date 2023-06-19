@@ -3,22 +3,31 @@ set -o errexit
 set -o nounset
 set -o xtrace
 
+# Image and kernel info for QEMU
 IMG_RELEASE_URL="https://cloud-images.ubuntu.com/releases/focal/release-20210125"
 IMG_RELEASE_UNPACKED_URL="${IMG_RELEASE_URL}/unpacked"
 IMG_NAME="ubuntu-20.04-server-cloudimg-amd64.img"
 KERNEL_NAME="ubuntu-20.04-server-cloudimg-amd64-vmlinuz-generic"
 INITRD_NAME="ubuntu-20.04-server-cloudimg-amd64-initrd-generic"
 KERNEL_VERSION="linux-headers-5.4.0-64-generic"
+
+# Path info for Host and QEMU
 DEMO_PATH="/home/${USER}/cosim_demo"
-QEMU_TARGET="qemu-system-x86_64"
 UBUNTU_IMG_PATH="${DEMO_PATH}/${IMG_NAME}"
 UBUNTU_KERNEL_PATH="${DEMO_PATH}/${KERNEL_NAME}"
 UBUNTU_INITRD_PATH="${DEMO_PATH}/${INITRD_NAME}"
 BIOS_PATH="${DEMO_PATH}/xilinx-qemu/pc-bios/bios-256k.bin"
 CLOUD_CONFIG_IMG_PATH="${DEMO_PATH}/cloud_init.img"
 TEMP_FILE_PATH="/tmp/machine-x86-qdma-demo"
-DOCKER_DRIVER_PATH="/tmp/driver"
 TEST_LOG_FILE_PATH="${TEMP_FILE_PATH}/test.log"
+DOCKER_DRIVER_PATH="/tmp/driver"
+
+# Parameters for Env
+XILINX_QEMU_BUILD_CACHE=${XILINX_QEMU_BUILD_CACHE:-false}
+ENABLE_KVM=${ENABLE_KVM:-false}
+
+# Prameters for QEMU
+QEMU_TARGET="qemu-system-x86_64"
 IMG_SIZE="10G"
 VM_MEM_SIZE="4G"
 VM_SMP_NUM="4"
@@ -67,11 +76,17 @@ else
     sudo make install
 fi
 
-# non-kvm version
+if [ $ENABLE_KVM = 'true' ] ; then
+    echo "KVM enabled"
+    QEMU_TARGET="${QEMU_TARGET} -M q35,accel=kvm,kernel-irqchip=split --enable-kvm"
+else
+    echo "KVM disabled"
+    QEMU_TARGET="${QEMU_TARGET} -M q35,kernel-irqchip=split"
+fi
+
 $QEMU_TARGET \
-    -M q35,kernel-irqchip=split -cpu qemu64,rdtscp \
-    -m $VM_MEM_SIZE -smp $VM_SMP_NUM -display none -no-reboot \
-    -serial mon:stdio \
+    -m $VM_MEM_SIZE -smp $VM_SMP_NUM -cpu qemu64,rdtscp \
+    -serial mon:stdio -display none -no-reboot \
     -drive file=$UBUNTU_IMG_PATH \
     -drive file=$CLOUD_CONFIG_IMG_PATH,format=raw \
     -kernel $UBUNTU_KERNEL_PATH \
@@ -88,9 +103,9 @@ $QEMU_TARGET \
     -fsdev local,security_model=mapped,id=fsdev0,path=$TEMP_FILE_PATH \
     -append "root=/dev/sda1 rootwait console=tty1 console=ttyS0 intel_iommu=on"
 
-sudo cat $TEMP_FILE_PATH/test.log
-
 # Check log file
+cat $TEST_LOG_FILE_PATH
+
 if [ ! -f "$TEST_LOG_FILE_PATH" ]
 then
     echo "${TEST_LOG_FILE_PATH} not found."
@@ -104,19 +119,3 @@ then
 else
     echo "Success: No FAILED or error found in $TEST_LOG_FILE_PATH"
 fi
-
-# # kvm version
-# $QEMU_TARGET \
-#     -M q35,accel=kvm,kernel-irqchip=split -cpu qemu64,rdtscp \
-#     -m 4G -smp 4 -enable-kvm -display none \
-#     -serial mon:stdio \
-#     -machine-path ${TEMP_FILE_PATH} \
-#     -drive file=$UBUNTU_IMG_PATH \
-#     -drive file=$CLOUD_CONFIG_IMG_PATH,format=raw \
-#     -device intel-iommu,intremap=on,device-iotlb=on \
-#     -device ioh3420,id=rootport1,slot=1 \
-#     -device remote-port-pci-adaptor,bus=rootport1,id=rp0 \
-#     -device virtio-net-pci,netdev=net0 -netdev type=user,id=net0,hostfwd=tcp::2222-:22 \
-#     -device remote-port-pcie-root-port,id=rprootport,slot=0,rp-adaptor0=rp,rp-chan0=0 \
-#     -device virtio-9p-pci,id=fs0,fsdev=fsdev0,mount_tag=shared \
-#     -fsdev local,security_model=mapped,id=fsdev0,path=$TEMP_FILE_PATH
