@@ -31,17 +31,11 @@ CHRDEV=/dev/${DRVDEV}-MM-0
 DIRMODE=${DEVICE}:0:2
 INDIRMODE=${DEVICE}:0:3
 
-DEVICE_ADDR="0x102100000"
-DEVICE_ADDR_PLUS_4K="0x102101000"
-DATA_SIZE_1K=1024
-DATA_SIZE_4K=4096
-DATA_SIZE_8K=8192
-
 # Regression test for the QEMU + xxx + QDMA device.
 #
 # This requires a little test harness in order to work:
 #   * The QDMA needs to be bound to a x86_64 QEMU and a 4K memory must be
-#     mapped at $DEVICE_ADDR on the "card" interface.  This acts as a dummy SBI
+#     mapped at 0x102100000 on the "card" interface.  This acts as a dummy SBI
 #     with the 4K keyhole.
 
 # Create some dummy files for the tests below.
@@ -76,12 +70,12 @@ $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q add idx 0 mode mm dir h2c
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q add idx 0 mode mm dir c2h
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir c2h
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir h2c
-echo "TEST1: Sending 1KB to the device @$DEVICE_ADDR"
+echo "TEST1: Sending 1KB to the device @0x102100000"
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-to-device -d ${CHRDEV} -f \
-						$FILE1 -s $DATA_SIZE_1K -a $DEVICE_ADDR
-echo "TEST1: Getting 1KB from the device @$DEVICE_ADDR"
+						$FILE1 -s 1024 -a 0x102100000
+echo "TEST1: Getting 1KB from the device @0x102100000"
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-from-device -d ${CHRDEV} -f \
-						$FILE2 -s $DATA_SIZE_1K -a $DEVICE_ADDR
+						$FILE2 -s 1024 -a 0x102100000
 echo "TEST1: Unloading the driver"
 rmmod qdma-pf.ko
 echo "TEST1: Comparing the files"
@@ -110,12 +104,12 @@ $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q add idx 0 mode mm dir h2c
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q add idx 0 mode mm dir c2h
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir c2h
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir h2c
-echo "TEST2: Sending 1KB to the device @$DEVICE_ADDR"
+echo "TEST2: Sending 1KB to the device @0x102100000"
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-to-device -d ${CHRDEV} -f \
-						$FILE1 -s $DATA_SIZE_1K -a $DEVICE_ADDR
-echo "TEST2: Getting 1KB from the device @$DEVICE_ADDR"
+						$FILE1 -s 1024 -a 0x102100000
+echo "TEST2: Getting 1KB from the device @0x102100000"
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-from-device -d ${CHRDEV} -f \
-						$FILE2 -s $DATA_SIZE_1K -a $DEVICE_ADDR
+						$FILE2 -s 1024 -a 0x102100000
 echo "TEST2: Unloading the driver"
 rmmod qdma-pf.ko
 echo "TEST2: Comparing the files"
@@ -146,13 +140,13 @@ $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q add idx 0 mode mm dir h2c
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q add idx 0 mode mm dir c2h
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir c2h
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir h2c \
-					  aperture_sz $DATA_SIZE_4K
-echo "TEST3: Send 8KB to the device @$DEVICE_ADDR"
+					  aperture_sz 4096
+echo "TEST3: Send 8KB to the device @0x102100000"
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-to-device -d ${CHRDEV} -f \
-						$FILE3 -s $DATA_SIZE_8K -a $DEVICE_ADDR
-echo "TEST3: Get last written 4KB from the device @$DEVICE_ADDR_PLUS_4K"
+						$FILE3 -s 8192 -a 0x102100000
+echo "TEST3: Get last written 4KB from the device @0x102101000"
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-from-device -d ${CHRDEV} -f \
-						$FILE2 -s $DATA_SIZE_4K -a $DEVICE_ADDR_PLUS_4K
+						$FILE2 -s 4096 -a 0x102101000
 echo "TEST3: Unloading the driver"
 rmmod qdma-pf.ko
 echo "TEST3: Comparing the files which should be different"
@@ -204,16 +198,16 @@ $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir h2c \
 $DRIVER_LOC/QDMA/linux-kernel/bin/dma-ctl ${DRVDEV} q start idx 0 dir c2h \
 					  idx_ringsz 1
 
-echo "TEST4: Sending 128x 4K to the device @$DEVICE_ADDR"
+echo "TEST4: Sending 128x 4K to the device @0x102100000"
 loop=0
 while [ "$loop" -lt 64 ]
 do
     $DRIVER_LOC/QDMA/linux-kernel/bin/dma-to-device -d ${CHRDEV} -f $FILE5    \
-						-s $(( $DATA_SIZE_4K ))            \
-						-a $DEVICE_ADDR > /dev/null
+						-s $(( 4 * 1024 ))            \
+						-a 0x102100000 > /dev/null
     $DRIVER_LOC/QDMA/linux-kernel/bin/dma-from-device -d ${CHRDEV} -f $FILE2  \
-						-s $(( $DATA_SIZE_4K ))            \
-						-a $DEVICE_ADDR > /dev/null
+						-s $(( 4 * 1024 ))            \
+						-a 0x102100000 > /dev/null
     diff $FILE5 $FILE2 > /dev/null
 
     if [ $? -gt 0 ]
@@ -223,11 +217,11 @@ do
     fi
 
     $DRIVER_LOC/QDMA/linux-kernel/bin/dma-to-device -d ${CHRDEV} -f $FILE6    \
-						-s $(( $DATA_SIZE_4K ))            \
-						-a $DEVICE_ADDR > /dev/null
+						-s $(( 4 * 1024 ))            \
+						-a 0x102100000 > /dev/null
     $DRIVER_LOC/QDMA/linux-kernel/bin/dma-from-device -d ${CHRDEV} -f $FILE2  \
-						-s $(( $DATA_SIZE_4K ))            \
-						-a $DEVICE_ADDR > /dev/null
+						-s $(( 4 * 1024 ))            \
+						-a 0x102100000 > /dev/null
     diff $FILE6 $FILE2 > /dev/null
 
     if [ $? -gt 0 ]
