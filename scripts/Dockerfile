@@ -9,7 +9,7 @@ RUN apt update && \
     apt install -y git make gcc libaio1 libaio-dev kmod $KERNEL_VERSION
 
 # Clone the QDMA driver
-RUN git clone https://github.com/Xilinx/dma_ip_drivers.git
+RUN git clone https://github.com/GTwhy/dma_ip_drivers.git
 
 # Build the driver
 WORKDIR dma_ip_drivers/QDMA/linux-kernel
